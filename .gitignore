@@ -1,23 +1,6 @@
 # .gitignore
 
-# Python compilation
-__pycache__/
-*.py[cod]
-
-# PyCharm settings
-.idea/
-
-# Virtual Environment
-.venv/
-.env/
-
-# Environment Variables (SECRET KEYS!)
+.venv
 .env
-
-# Database
-*.db
-*.sqlite3
-postgres_data/
-
-# OS specific
-.DS_Store
+.idea
+/postgres_data
