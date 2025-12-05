@@ -17,7 +17,7 @@ __pycache__/
 # Database
 *.db
 *.sqlite3
-instance/
+postgres_data/
 
 # OS specific
 .DS_Store
