@@ -51,6 +51,10 @@ STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REFRESH_TOKEN=your_refresh_token
 ```
 
+#### IMPORTANT
+For demonstartion purposes I hardcoded my API keys in .env.example file. Please rename it to .env 
+
+
 ### 3. Launch
 
 Start the application stack:
