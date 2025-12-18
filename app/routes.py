@@ -8,6 +8,8 @@ import plotly.express as px
 import plotly.io as pio
 import folium
 import polyline
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 main = Blueprint('main', __name__)
 
@@ -22,7 +24,6 @@ def dashboard():
     # 1. Prepare Data
     data = []
     for a in activities:
-        # Calculate Speed (m/s to km/h)
         speed_kmh = 0
         if a.moving_time > 0:
             speed_kmh = (a.distance / 1000) / (a.moving_time / 3600)
@@ -44,24 +45,51 @@ def dashboard():
     activity_count = len(df)
 
     # 3. Chart 1: Weekly Volume (Bar Chart)
-    df.set_index('date', inplace=True)
-    weekly_vol = df[df['type'] == 'Run'].resample('W')['distance_km'].sum().reset_index()
+    # We sort by date for correct plotting
+    df_sorted = df.sort_values('date')
+
+    df_run = df_sorted[df_sorted['type'] == 'Run']
+    weekly_vol = df_run.resample('W', on='date')['distance_km'].sum().reset_index()
 
     fig_vol = px.bar(weekly_vol, x='date', y='distance_km',
                      title='Weekly Running Volume',
                      labels={'distance_km': 'Distance (km)', 'date': 'Week'})
+    fig_vol.update_layout(height=350)  # Set fixed height
     chart_html = pio.to_html(fig_vol, full_html=False)
 
-    # 4. Chart 2: Correlation Speed vs Heart Rate (Scatter Plot)
-    # Filter out activities with no heart rate
-    df_hr = df.dropna(subset=['heart_rate'])
+    # 4. NEW Chart 2: Speed vs Heart Rate Over Time (Dual Axis)
+    # We focus on Runs to keep the scale consistent
+    df_perf = df_run.dropna(subset=['heart_rate'])
 
-    if not df_hr.empty:
-        # This creates the correlation chart you asked for
-        fig_hr = px.scatter(df_hr, x='speed_kmh', y='heart_rate', color='type',
-                            title='Performance: Speed vs Heart Rate Correlation',
-                            labels={'speed_kmh': 'Speed (km/h)', 'heart_rate': 'Avg HR (bpm)'},
-                            hover_data=['distance_km'])
+    if not df_perf.empty:
+        # Create figure with secondary y-axis
+        fig_hr = make_subplots(specs=[[{"secondary_y": True}]])
+
+        # Add Speed Line (Left Axis)
+        fig_hr.add_trace(
+            go.Scatter(x=df_perf['date'], y=df_perf['speed_kmh'], name="Speed (km/h)",
+                       mode='lines+markers', line=dict(color='#1f77b4')),
+            secondary_y=False,
+        )
+
+        # Add Heart Rate Line (Right Axis)
+        fig_hr.add_trace(
+            go.Scatter(x=df_perf['date'], y=df_perf['heart_rate'], name="Heart Rate (bpm)",
+                       mode='lines+markers', line=dict(color='#d62728')),
+            secondary_y=True,
+        )
+
+        # Layout details
+        fig_hr.update_layout(
+            title_text="Fitness Trend: Speed vs Heart Rate (Runs Only)",
+            height=400,
+            hovermode="x unified"  # Shows both values when you hover over a date
+        )
+
+        # Set axis titles
+        fig_hr.update_yaxes(title_text="Speed (km/h)", secondary_y=False)
+        fig_hr.update_yaxes(title_text="Heart Rate (bpm)", secondary_y=True)
+
         hr_chart_html = pio.to_html(fig_hr, full_html=False)
     else:
         hr_chart_html = "<div class='text-center p-5'>No Heart Rate Data Available</div>"
@@ -72,7 +100,6 @@ def dashboard():
                            count=activity_count,
                            chart_html=chart_html,
                            hr_chart_html=hr_chart_html)
-
 
 @main.route('/sync')
 def sync_data():
