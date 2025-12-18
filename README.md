@@ -33,6 +33,8 @@ The project follows a microservices-lite architecture using Docker:
 > For demonstration purposes, I have included a pre-filled `.env.example` file with my working API keys.
 >
 > **Action Required:** Rename `.env.example` to `.env` before running the project. Skip setup to the step 3. Launch
+>
+> If for some reason API won't work I have also included Screenshots of working web UI. 
 
 ### 1. Configure Strava API
 
