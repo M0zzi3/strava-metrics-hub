@@ -94,12 +94,33 @@ def dashboard():
     else:
         hr_chart_html = "<div class='text-center p-5'>No Heart Rate Data Available</div>"
 
+    # 5. Chart 3: Activity Breakdown (Pie Chart)
+    # Counts how many runs vs rides
+    fig_pie = px.pie(df, names='type', title='Activity Distribution', hole=0.4)
+    fig_pie.update_layout(height=350)
+    pie_chart_html = pio.to_html(fig_pie, full_html=False)
+
+    # 6. Chart 4: Cumulative Elevation (Area Chart)
+    # Sort by date first
+    df_sorted = df.sort_values('date')
+    # Calculate cumulative sum of elevation
+    df_sorted['cum_elevation'] = df_sorted['elevation'].cumsum()
+
+    fig_elev = px.area(df_sorted, x='date', y='cum_elevation',
+                       title='Cumulative Elevation Gain (m)',
+                       labels={'cum_elevation': 'Total Climbed (m)'})
+    fig_elev.update_layout(height=350)
+    elev_chart_html = pio.to_html(fig_elev, full_html=False)
+
     return render_template('dashboard.html',
                            total_km=total_km,
                            total_elevation=total_elevation,
                            count=activity_count,
-                           chart_html=chart_html,
-                           hr_chart_html=hr_chart_html)
+                           chart_html=chart_html,  # Volume Bar
+                           hr_chart_html=hr_chart_html,  # Speed vs HR
+                           pie_chart_html=pie_chart_html,  # NEW Pie
+                           elev_chart_html=elev_chart_html  # NEW Area
+                           )
 
 @main.route('/sync')
 def sync_data():
