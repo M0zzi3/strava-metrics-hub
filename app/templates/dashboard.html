@@ -9,10 +9,16 @@
   <body class="bg-light">
 
     <div class="container py-5">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>🏃 Strava Metrics Hub</h1>
-        <a href="/sync" class="btn btn-primary">Sync Now</a>
-      </div>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+          <a class="navbar-brand" href="/">Strava Hub</a>
+          <div class="navbar-nav">
+            <a class="nav-link active" href="/">Dashboard</a>
+            <a class="nav-link" href="/activities">Activity Log</a>
+          </div>
+          <a href="/sync" class="btn btn-outline-light btn-sm ms-auto">Sync New Data</a>
+        </div>
+      </nav>
 
       <div class="row text-center mb-4">
         <div class="col-md-4">

@@ -100,3 +100,12 @@ def sync_data():
     db.session.commit()
 
     return jsonify({"status": "success", "added": added_count})
+
+
+@main.route('/activities')
+def activity_list():
+    # Fetch all activities, sorted by date
+    activities = Activity.query.order_by(Activity.start_date.desc()).all()
+
+    # We can pass the objects directly to Jinja
+    return render_template('activities.html', activities=activities)
