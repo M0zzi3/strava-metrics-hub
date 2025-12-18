@@ -26,9 +26,8 @@ class Activity(db.Model):
     moving_time = db.Column(db.Integer)  # seconds
     total_elevation_gain = db.Column(db.Float)  # meters
     start_date = db.Column(db.DateTime, nullable=False)
-
-    # For visualization
     summary_polyline = db.Column(db.Text, nullable=True)  # Map string
+    average_heartrate = db.Column(db.Float, nullable=True)
 
     def __repr__(self):
         return f'<Activity {self.name}>'

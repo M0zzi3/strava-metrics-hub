@@ -42,6 +42,20 @@
         </div>
       </div>
 
+      <div class="row">
+          <div class="col-md-6 mb-4">
+              <div class="card shadow-sm p-4 h-100">
+                {{ chart_html | safe }}
+              </div>
+          </div>
+
+          <div class="col-md-6 mb-4">
+              <div class="card shadow-sm p-4 h-100">
+                {{ hr_chart_html | safe }}
+              </div>
+          </div>
+      </div>
+
       <div class="card shadow-sm p-4">
         {{ chart_html | safe }}
       </div>
