@@ -1,6 +1,6 @@
 import requests
-import time
 import os
+
 
 class StravaClient:
     def __init__(self):

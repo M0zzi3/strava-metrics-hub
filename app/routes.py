@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request
 from .models import db, Activity
 from .strava_client import StravaClient
 import os
@@ -14,9 +14,12 @@ import plotly.graph_objects as go
 main = Blueprint('main', __name__)
 
 
-# --- 1. DASHBOARD ROUTE ---
 @main.route('/')
 def dashboard():
+    """
+    Main dashboard route.
+    Fetches activities from DB and renders key metrics and charts.
+    """
     activities = Activity.query.order_by(Activity.start_date.desc()).all()
 
     # AUTO-SYNC CHECK: If empty, trigger full sync
@@ -24,7 +27,7 @@ def dashboard():
         print("Database empty. Triggering initial full sync...")
         return redirect(url_for('main.sync_data', mode='full'))
 
-    # 1. Prepare Data
+    # Prepare Data
     data = []
     for a in activities:
         speed_kmh = 0
@@ -42,12 +45,12 @@ def dashboard():
 
     df = pd.DataFrame(data)
 
-    # 2. Key Metrics
+    # Key Metrics
     total_km = round(df['distance_km'].sum(), 2)
     total_elevation = int(df['elevation'].sum())
     activity_count = len(df)
 
-    # 3. Chart 1: Weekly Volume (Bar Chart)
+    # Chart 1: Weekly Volume (Bar Chart)
     df_sorted = df.sort_values('date')
     df_run = df_sorted[df_sorted['type'] == 'Run']
     weekly_vol = df_run.resample('W', on='date')['distance_km'].sum().reset_index()
@@ -58,7 +61,7 @@ def dashboard():
     fig_vol.update_layout(height=350)
     chart_html = pio.to_html(fig_vol, full_html=False)
 
-    # 4. Chart 2: Speed vs Heart Rate Over Time (Dual Axis)
+    # Chart 2: Speed vs Heart Rate Over Time (Dual Axis)
     df_perf = df_run.dropna(subset=['heart_rate'])
 
     if not df_perf.empty:
@@ -86,12 +89,12 @@ def dashboard():
     else:
         hr_chart_html = "<div class='text-center p-5'>No Heart Rate Data Available</div>"
 
-    # 5. Chart 3: Pie Chart
+    # Chart 3: Pie Chart
     fig_pie = px.pie(df, names='type', title='Activity Distribution', hole=0.4)
     fig_pie.update_layout(height=350)
     pie_chart_html = pio.to_html(fig_pie, full_html=False)
 
-    # 6. Chart 4: Area Chart
+    # Chart 4: Area Chart
     df_sorted['cum_elevation'] = df_sorted['elevation'].cumsum()
     fig_elev = px.area(df_sorted, x='date', y='cum_elevation', title='Cumulative Elevation Gain (m)')
     fig_elev.update_layout(height=350)
@@ -107,9 +110,12 @@ def dashboard():
                            elev_chart_html=elev_chart_html)
 
 
-# --- 2. SYNC ROUTE (SMART SYNC) ---
 @main.route('/sync')
 def sync_data():
+    """
+    Sync route to fetch new data from Strava.
+    Supports mode='recent' (default) or mode='full'.
+    """
     client = StravaClient()
     refresh_token = os.environ.get('STRAVA_REFRESH_TOKEN')
 
@@ -173,16 +179,20 @@ def sync_data():
     return redirect(url_for('main.dashboard'))
 
 
-# --- 3. ACTIVITY LIST ROUTE (RESTORED) ---
 @main.route('/activities')
 def activity_list():
+    """
+    Render the activity log page.
+    """
     activities = Activity.query.order_by(Activity.start_date.desc()).all()
     return render_template('activities.html', activities=activities)
 
 
-# --- 4. MAP ROUTE (RESTORED) ---
 @main.route('/map')
 def map_view():
+    """
+    Render the heatmap of all activities.
+    """
     activities = Activity.query.filter(Activity.summary_polyline != None).all()
     start_coords = [51.2194, 4.4025]
 
