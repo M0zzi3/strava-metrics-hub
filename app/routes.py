@@ -18,17 +18,26 @@ def index():
 def sync_data():
     client = StravaClient()
 
-    # 1. Get a fresh Access Token using the Refresh Token from .env
     refresh_token = os.environ.get('STRAVA_REFRESH_TOKEN')
-    token_data = client.refresh_access_token(refresh_token)
 
+    # 1. Check if token refresh worked
+    token_data = client.refresh_access_token(refresh_token)
     if 'access_token' not in token_data:
+        # Print the error to the docker logs and return it
+        print(f"Token Error: {token_data}", flush=True)
         return jsonify({"error": "Failed to refresh token", "details": token_data}), 400
 
     access_token = token_data['access_token']
 
-    # 2. Fetch Activities from Strava
+    # 2. Fetch Activities
     activities_json = client.get_activities(access_token, page=1)
+
+    # --- SAFETY CHECK START ---
+    # If Strava returns a dictionary (error), stop immediately.
+    if isinstance(activities_json, dict):
+        print(f"Strava API Error: {activities_json}", flush=True)
+        return jsonify({"error": "Strava API returned an error", "strava_response": activities_json}), 400
+
 
     # 3. Save to DB
     added_count = 0
@@ -48,6 +57,7 @@ def sync_data():
             )
             db.session.add(new_activity)
             added_count += 1
+            pass
 
     db.session.commit()
 
