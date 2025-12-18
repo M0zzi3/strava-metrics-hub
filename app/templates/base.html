@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Strava Metrics Hub{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+      :root {
+        --strava-orange: #FC4C02;
+        --strava-grey: #F0F0F0;
+      }
+      
+      /* Orange Accents */
+      .text-orange { color: var(--strava-orange) !important; }
+      .bg-orange { background-color: var(--strava-orange) !important; }
+      .btn-primary { 
+        background-color: var(--strava-orange); 
+        border-color: var(--strava-orange); 
+      }
+      .btn-primary:hover { 
+        background-color: #e34402; 
+        border-color: #e34402; 
+      }
+      .btn-outline-primary {
+        color: var(--strava-orange);
+        border-color: var(--strava-orange);
+      }
+      .btn-outline-primary:hover {
+        background-color: var(--strava-orange);
+        color: white;
+      }
+      
+      /* Navbar Tweaks */
+      .navbar-brand { font-weight: bold; color: var(--strava-orange) !important; }
+      .nav-link.active { color: white !important; font-weight: 500; border-bottom: 2px solid var(--strava-orange); }
+      
+      /* Card Hover Effect */
+      .card { transition: transform 0.2s; border: none; }
+      .card:hover { transform: translateY(-2px); }
+    </style>
+
+    {% block head %}{% endblock %}
+  </head>
+  <body class="bg-light">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
+      <div class="container">
+        <a class="navbar-brand" href="/">
+          <span class="text-white">Strava</span><span class="text-orange">Hub</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <div class="navbar-nav me-auto">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Dashboard</a>
+            <a class="nav-link {% if request.path == '/activities' %}active{% endif %}" href="/activities">Activity Log</a>
+            <a class="nav-link {% if request.path == '/map' %}active{% endif %}" href="/map">Heatmap</a>
+          </div>
+          
+          <div class="d-flex gap-2">
+            <a href="/sync" class="btn btn-primary btn-sm fw-bold">
+              Sync Recent
+            </a>
+            <a href="/sync?mode=full" class="btn btn-outline-light btn-sm"
+               title="Force download of all history"
+               onclick="return confirm('Full import can take a while. Continue?')">
+              ↻ Full Import
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

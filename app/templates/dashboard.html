@@ -1,89 +1,61 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Strava Metrics Hub</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
-  <body class="bg-light">
+{% extends "base.html" %}
 
-    <div class="container py-5">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-          <a class="navbar-brand" href="/">Strava Hub</a>
-          <div class="navbar-nav">
-              <a class="nav-link active" href="/">Dashboard</a>
-              <a class="nav-link" href="/activities">Activity Log</a>
-              <a class="nav-link" href="/map">Heatmap</a>
-          </div>
-          <div class="ms-auto d-flex gap-2">
-            <a href="/sync" class="btn btn-primary btn-sm">
-                Sync Recent
-            </a>
+{% block title %}Dashboard - Strava Metrics Hub{% endblock %}
 
-            <a href="/sync?mode=full" class="btn btn-outline-warning btn-sm"
-            title="Force download of all history (Slow)"
-            onclick="return confirm('This will scan your entire Strava history. It may take a while. Continue?')">
-            ↻ Full Import
-            </a>
-            </div>
-        </div>
-      </nav>
-
-      <div class="row text-center mb-4">
-        <div class="col-md-4">
-          <div class="card p-3 shadow-sm">
-            <h3>{{ total_km }} km</h3>
-            <p class="text-muted">Total Distance</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card p-3 shadow-sm">
-            <h3>{{ total_elevation }} m</h3>
-            <p class="text-muted">Elevation Gain</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card p-3 shadow-sm">
-            <h3>{{ count }}</h3>
-            <p class="text-muted">Activities</p>
-          </div>
-        </div>
+{% block content %}
+<div class="container pb-5">
+  
+  <!-- KPI Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm h-100">
+        <h3 class="display-6 fw-bold text-dark">{{ total_km }} <span class="fs-5 text-muted">km</span></h3>
+        <p class="text-uppercase text-secondary small fw-bold">Total Distance</p>
       </div>
-
-    <div class="row">
-
-          <div class="col-12 mb-4">
-              <div class="card shadow-sm p-3">
-                {{ chart_html | safe }}
-              </div>
-          </div>
-
-          <div class="col-12 mb-4">
-              <div class="card shadow-sm p-3">
-                {{ hr_chart_html | safe }}
-              </div>
-          </div>
-
-          <div class="col-md-6 mb-4">
-              <div class="card shadow-sm p-3">
-                {{ pie_chart_html | safe }}
-              </div>
-          </div>
-          <div class="col-md-6 mb-4">
-              <div class="card shadow-sm p-3">
-                {{ elev_chart_html | safe }}
-              </div>
-          </div>
-
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm h-100">
+        <h3 class="display-6 fw-bold text-dark">{{ total_elevation }} <span class="fs-5 text-muted">m</span></h3>
+        <p class="text-uppercase text-secondary small fw-bold">Elevation Gain</p>
       </div>
-
-      <div class="card shadow-sm p-4">
-        {{ chart_html | safe }}
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm h-100">
+        <h3 class="display-6 fw-bold text-dark">{{ count }}</h3>
+        <p class="text-uppercase text-secondary small fw-bold">Activities</p>
       </div>
+    </div>
+  </div>
 
+  <!-- Charts Grid -->
+  <div class="row g-4">
+    
+    <!-- Weekly Volume -->
+    <div class="col-12">
+        <div class="card shadow-sm p-1">
+          {{ chart_html | safe }}
+        </div>
     </div>
 
-  </body>
-</html>
+    <!-- Heart Rate vs Speed -->
+    <div class="col-12">
+        <div class="card shadow-sm p-1">
+          {{ hr_chart_html | safe }}
+        </div>
+    </div>
+
+    <!-- Pie & Area Charts -->
+    <div class="col-md-6">
+        <div class="card shadow-sm p-1 h-100">
+          {{ pie_chart_html | safe }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm p-1 h-100">
+          {{ elev_chart_html | safe }}
+        </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

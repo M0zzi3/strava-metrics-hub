@@ -1,88 +1,81 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Activity Log</title>
+{% extends "base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  </head>
-  <body class="bg-light">
+{% block title %}Activity Log - Strava Metrics Hub{% endblock %}
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-          <a class="navbar-brand" href="/">Strava Hub</a>
-          <div class="navbar-nav">
-              <a class="nav-link active" href="/">Dashboard</a>
-              <a class="nav-link" href="/activities">Activity Log</a>
-              <a class="nav-link" href="/map">Heatmap</a>
-          </div>
-          <div class="ms-auto d-flex gap-2">
-            <a href="/sync" class="btn btn-primary btn-sm">
-                Sync Recent
-            </a>
+{% block head %}
+  <!-- DataTables CSS -->
+  <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+{% endblock %}
 
-            <a href="/sync?mode=full" class="btn btn-outline-warning btn-sm"
-            title="Force download of all history (Slow)"
-            onclick="return confirm('This will scan your entire Strava history. It may take a while. Continue?')">
-            ↻ Full Import
-            </a>
-            </div>
-        </div>
-      </nav>
-
-    <div class="container">
-      <div class="card shadow-sm p-4">
-        <h2 class="mb-4">Training Log</h2>
-
-        <table id="activityTable" class="table table-striped" style="width:100%">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Dist (km)</th>
-              <th>Time</th>
-              <th>Elevation (m)</th>
-              <th>Avg HR</th> </tr>
-          </thead>
-          <tbody>
-            {% for activity in activities %}
-            <tr>
-              <td>{{ activity.start_date.strftime('%Y-%m-%d') }}</td>
-              <td>{{ activity.name }}</td>
-              <td><span class="badge bg-secondary">{{ activity.type }}</span></td>
-              <td>{{ (activity.distance / 1000) | round(2) }}</td>
-              <td>{{ (activity.moving_time / 60) | int }} min</td>
-              <td>{{ activity.total_elevation_gain }}</td>
-
-              <td>
-                {% if activity.average_heartrate %}
-                  {{ activity.average_heartrate | int }} bpm
-                {% else %}
-                  <span class="text-muted">-</span>
-                {% endif %}
-              </td>
-
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+{% block content %}
+<div class="container pb-5">
+  <div class="card shadow-sm p-4 border-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold mb-0">Training Log</h2>
+      <span class="badge bg-secondary">{{ activities|length }} Activities</span>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <div class="table-responsive">
+      <table id="activityTable" class="table table-hover align-middle" style="width:100%">
+        <thead class="table-light">
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Dist (km)</th>
+            <th>Time</th>
+            <th>Elev (m)</th>
+            <th>Avg HR</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for activity in activities %}
+          <tr>
+            <td class="text-nowrap">{{ activity.start_date.strftime('%Y-%m-%d') }}</td>
+            <td class="fw-bold">{{ activity.name }}</td>
+            <td>
+              {% if activity.type == 'Run' %}
+                <span class="badge bg-orange">Run</span>
+              {% elif activity.type == 'Ride' %}
+                <span class="badge bg-primary">Ride</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ activity.type }}</span>
+              {% endif %}
+            </td>
+            <td>{{ (activity.distance / 1000) | round(2) }}</td>
+            <td>{{ (activity.moving_time / 60) | int }} min</td>
+            <td>{{ activity.total_elevation_gain }}</td>
+            <td>
+              {% if activity.average_heartrate %}
+                {{ activity.average_heartrate | int }} <span class="text-muted small">bpm</span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
-    <script>
-      $(document).ready(function () {
-        $('#activityTable').DataTable({
-          "order": [[ 0, "desc" ]] // Sort by Date (Column 0) descending by default
-        });
+{% block scripts %}
+  <!-- DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#activityTable').DataTable({
+        "order": [[ 0, "desc" ]], // Sort by Date descending
+        "pageLength": 25,
+        "language": {
+          "search": "Filter activities:"
+        }
       });
-    </script>
-
-  </body>
-</html>
+    });
+  </script>
+{% endblock %}
