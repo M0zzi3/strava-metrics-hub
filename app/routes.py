@@ -1,17 +1,55 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template # Add render_template
 from .models import db, Activity
 from .strava_client import StravaClient
 import os
 from datetime import datetime
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
 
 main = Blueprint('main', __name__)
 
 
 @main.route('/')
-def index():
-    # Simple count query
-    count = Activity.query.count()
-    return f"<h1>Strava Hub</h1><p>Activities in DB: {count}</p>"
+def dashboard():
+    # 1. Fetch data from DB
+    activities = Activity.query.order_by(Activity.start_date.desc()).all()
+
+    if not activities:
+        return "<h1>No Data</h1><p>Go to <a href='/sync'>/sync</a> to import activities.</p>"
+
+    # 2. Convert to Pandas DataFrame for easy math
+    data = [{
+        'date': a.start_date,
+        'distance_km': a.distance / 1000,  # Convert m to km
+        'type': a.type,
+        'elevation': a.total_elevation_gain
+    } for a in activities]
+
+    df = pd.DataFrame(data)
+
+    # 3. Calculate Key Metrics
+    total_km = round(df['distance_km'].sum(), 2)
+    total_elevation = int(df['elevation'].sum())
+    activity_count = len(df)
+
+    # 4. Generate Plotly Chart (Weekly Volume)
+    # Resample by week ('W') and sum distance
+    df.set_index('date', inplace=True)
+    weekly_vol = df[df['type'] == 'Run'].resample('W')['distance_km'].sum().reset_index()
+
+    fig = px.bar(weekly_vol, x='date', y='distance_km',
+                 title='Weekly Running Volume (km)',
+                 labels={'distance_km': 'Distance (km)', 'date': 'Week'})
+
+    # Convert chart to HTML to embed
+    chart_html = pio.to_html(fig, full_html=False)
+
+    return render_template('dashboard.html',
+                           total_km=total_km,
+                           total_elevation=total_elevation,
+                           count=activity_count,
+                           chart_html=chart_html)
 
 
 @main.route('/sync')
