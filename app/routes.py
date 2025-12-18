@@ -6,6 +6,8 @@ from datetime import datetime
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+import folium
+import polyline
 
 main = Blueprint('main', __name__)
 
@@ -109,3 +111,52 @@ def activity_list():
 
     # We can pass the objects directly to Jinja
     return render_template('activities.html', activities=activities)
+
+
+@main.route('/map')
+def map_view():
+    # 1. Get activities that actually have a map line
+    activities = Activity.query.filter(Activity.summary_polyline != None).all()
+
+    # 2. Decide where to center the map
+    # Default to Antwerp (based on your profile) if no data
+    start_coords = [51.2194, 4.4025]
+
+    if activities:
+        # Decode the most recent activity to use its start point as map center
+        try:
+            first_poly = polyline.decode(activities[0].summary_polyline)
+            if first_poly:
+                start_coords = first_poly[0]
+        except:
+            pass
+
+    # 3. Create the Map
+    m = folium.Map(location=start_coords, zoom_start=13, tiles='CartoDB dark_matter')
+
+    # 4. Draw every activity
+    for act in activities:
+        if act.summary_polyline:
+            try:
+                # Decode string to [(lat, lon), (lat, lon), ...]
+                coords = polyline.decode(act.summary_polyline)
+
+                # Choose color based on type
+                color = '#ff4b4b' if act.type == 'Run' else '#0000ff'  # Red for Run, Blue for Ride
+
+                # Add line to map
+                folium.PolyLine(
+                    coords,
+                    color=color,
+                    weight=2.5,
+                    opacity=0.6,
+                    tooltip=f"{act.name} ({act.start_date.strftime('%Y-%m-%d')})"
+                ).add_to(m)
+            except Exception as e:
+                print(f"Error decoding activity {act.id}: {e}")
+                continue
+
+    # 5. Extract HTML to render in template
+    map_html = m._repr_html_()
+
+    return render_template('map.html', map_html=map_html)
