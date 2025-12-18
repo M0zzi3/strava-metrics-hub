@@ -21,6 +21,8 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
+    from .models import Athlete, Activity
+
     # Create tables
     with app.app_context():
         db.create_all()
