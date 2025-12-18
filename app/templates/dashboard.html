@@ -13,11 +13,21 @@
         <div class="container">
           <a class="navbar-brand" href="/">Strava Hub</a>
           <div class="navbar-nav">
-            <a class="nav-link active" href="/">Dashboard</a>
-            <a class="nav-link" href="/activities">Activity Log</a>
-            <a class="nav-link" href="/map">Heatmap</a>
+              <a class="nav-link active" href="/">Dashboard</a>
+              <a class="nav-link" href="/activities">Activity Log</a>
+              <a class="nav-link" href="/map">Heatmap</a>
           </div>
-          <a href="/sync" class="btn btn-outline-light btn-sm ms-auto">Sync New Data</a>
+          <div class="ms-auto d-flex gap-2">
+            <a href="/sync" class="btn btn-primary btn-sm">
+                Sync Recent
+            </a>
+
+            <a href="/sync?mode=full" class="btn btn-outline-warning btn-sm"
+            title="Force download of all history (Slow)"
+            onclick="return confirm('This will scan your entire Strava history. It may take a while. Continue?')">
+            ↻ Full Import
+            </a>
+            </div>
         </div>
       </nav>
 
