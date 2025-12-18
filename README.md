@@ -1,35 +1,79 @@
-# 🏃 Strava Metrics Hub
+# Strava Metrics Hub
 
-A containerized Flask application for endurance athletes to sync, analyze, and visualize their Strava training history.
+A self-hosted analytics dashboard for endurance athletes. This application synchronizes your Strava history into a local PostgreSQL database and provides interactive visualizations for training analysis.
 
-## 🌟 Features
-* **OAuth2 Authentication:** Secure login via Strava API with automatic token refreshing.
-* **Data Pipeline:** Fetches raw JSON data, parses it, and stores it in a PostgreSQL database.
-* **Dashboard:** Interactive charts (Plotly) showing training volume trends.
-* **Activity Log:** Searchable and sortable history table (DataTables.js).
-* **Geospatial Heatmap:** Interactive map visualizing all run/ride routes (Folium).
-* **Infrastructure:** Fully dockerized (Flask + PostgreSQL) for easy deployment.
+Designed to give athletes ownership of their data with powerful tools for trend analysis and geospatial visualization.
 
-## 🛠 Technology Stack
-* **Backend:** Python 3.9, Flask, SQLAlchemy
-* **Database:** PostgreSQL 15
-* **Frontend:** Bootstrap 5, Jinja2, Plotly, Folium
-* **DevOps:** Docker, Docker Compose
-* **External API:** Strava V3 API
+## Architecture
 
-## 🚀 How to Run
+The project follows a microservices-lite architecture using Docker:
+
+*   **Web Container:** Python 3.9 + Flask application serving the UI and handling API logic.
+*   **Database Container:** PostgreSQL 15 for persistent storage of activity data.
+*   **Data Science Stack:** Pandas and NumPy for data transformation; Plotly and Folium for visualization.
+
+## Key Features
+
+*   **Smart Sync:** Incrementally fetches new activities from Strava using OAuth2.
+*   **Performance Dashboard:**
+    *   **Volume Analysis:** Weekly distance tracking.
+    *   **Intensity Correlation:** Interactive chart comparing Speed vs. Heart Rate over time.
+    *   **Cumulative Gains:** Elevation gain tracking.
+*   **Geospatial Heatmap:** Aggregated map of all activity routes.
+*   **Activity Archive:** Searchable, sortable log of all historical data.
+
+## Getting Started
 
 ### Prerequisites
-* Docker & Docker Compose installed
-* A Strava Account & API Application (Client ID/Secret)
 
-### 1. Setup Environment
-Create a `.env` file in the root directory:
+*   Docker Desktop (or Docker Engine + Compose)
+*   A Strava Account
+
+### 1. Configure Strava API
+
+1.  Go to your [Strava API Settings](https://www.strava.com/settings/api).
+2.  Create an application to get your `Client ID` and `Client Secret`.
+3.  Use a tool (like Postman or a simple curl script) to perform the initial OAuth handshake and obtain your first `Refresh Token`.
+
+### 2. Environment Setup
+
+Create a `.env` file in the project root with your credentials:
+
 ```bash
+# Database Configuration
 POSTGRES_USER=strava_user
-POSTGRES_PASSWORD=password
+POSTGRES_PASSWORD=secure_password
 POSTGRES_DB=strava_db
 
-STRAVA_CLIENT_ID=your_id
-STRAVA_CLIENT_SECRET=your_secret
+# Strava API Credentials
+STRAVA_CLIENT_ID=12345
+STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REFRESH_TOKEN=your_refresh_token
+```
+
+### 3. Launch
+
+Start the application stack:
+
+```bash
+docker compose up -d --build
+```
+
+The application will be available at: **http://localhost:5000**
+
+## Usage Guide
+
+1.  **Initial Sync:** On the dashboard, click the "Sync Recent" button. For a complete history import, use the "Full Import" option (this may take time depending on your history size).
+2.  **Analyze:** Browse the dashboard for high-level trends or the Activity Log for specific session details.
+3.  **Map:** View the Heatmap tab to see your global activity footprint.
+
+## Tech Stack
+
+*   **Backend:** Flask, SQLAlchemy
+*   **Database:** PostgreSQL
+*   **Frontend:** Bootstrap 5, Jinja2
+*   **Visualization:** Plotly.js, Folium
+*   **Infrastructure:** Docker Compose
+
+---
+*Student Project - Python Programming Course*
