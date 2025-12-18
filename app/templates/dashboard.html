@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Strava Metrics Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+
+    <div class="container py-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>🏃 Strava Metrics Hub</h1>
+        <a href="/sync" class="btn btn-primary">Sync Now</a>
+      </div>
+
+      <div class="row text-center mb-4">
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm">
+            <h3>{{ total_km }} km</h3>
+            <p class="text-muted">Total Distance</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm">
+            <h3>{{ total_elevation }} m</h3>
+            <p class="text-muted">Elevation Gain</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3 shadow-sm">
+            <h3>{{ count }}</h3>
+            <p class="text-muted">Activities</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-4">
+        {{ chart_html | safe }}
+      </div>
+
+    </div>
+
+  </body>
+</html>
