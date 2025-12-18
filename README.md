@@ -24,6 +24,11 @@ The project follows a microservices-lite architecture using Docker:
 
 ## Getting Started
 
+> **IMPORTANT FOR GRADING**
+> For demonstration purposes, I have included a pre-filled `.env.example` file with my working API keys.
+>
+> **Action Required:** Rename `.env.example` to `.env` before running the project. Skip to the Setp 3
+
 ### Prerequisites
 
 *   Docker Desktop (or Docker Engine + Compose)
@@ -50,12 +55,6 @@ STRAVA_CLIENT_ID=12345
 STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REFRESH_TOKEN=your_refresh_token
 ```
-
-> **IMPORTANT FOR GRADING**
-> For demonstration purposes, I have included a pre-filled `.env.example` file with my working API keys.
->
-> **Action Required:** Rename `.env.example` to `.env` before running the project.
-
 
 ### 3. Launch
 
