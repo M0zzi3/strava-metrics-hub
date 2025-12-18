@@ -51,8 +51,10 @@ STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REFRESH_TOKEN=your_refresh_token
 ```
 
-#### IMPORTANT
-For demonstartion purposes I hardcoded my API keys in .env.example file. Please rename it to .env 
+> **IMPORTANT FOR GRADING**
+> For demonstration purposes, I have included a pre-filled `.env.example` file with my working API keys.
+>
+> **Action Required:** Rename `.env.example` to `.env` before running the project.
 
 
 ### 3. Launch
