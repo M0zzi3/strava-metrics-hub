@@ -18,6 +18,7 @@ class StravaClient:
             'refresh_token': refresh_token
         }
         response = requests.post(self.auth_url, data=payload)
+        response.raise_for_status()
         return response.json()
 
     def get_headers(self, access_token):
@@ -28,4 +29,5 @@ class StravaClient:
         url = f"{self.base_url}/athlete/activities"
         params = {'page': page, 'per_page': 50}
         response = requests.get(url, headers=self.get_headers(access_token), params=params)
+        response.raise_for_status()
         return response.json()

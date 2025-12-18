@@ -1,8 +1,7 @@
-from flask import Blueprint, render_template, redirect, url_for, request
-from .models import db, Activity
-from .strava_client import StravaClient
 import os
 from datetime import datetime
+
+from flask import Blueprint, render_template, redirect, url_for, request
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
@@ -10,6 +9,9 @@ import folium
 import polyline
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+
+from .models import db, Activity
+from .strava_client import StravaClient
 
 main = Blueprint('main', __name__)
 
@@ -29,17 +31,17 @@ def dashboard():
 
     # Prepare Data
     data = []
-    for a in activities:
+    for activity in activities:
         speed_kmh = 0
-        if a.moving_time > 0:
-            speed_kmh = (a.distance / 1000) / (a.moving_time / 3600)
+        if activity.moving_time > 0:
+            speed_kmh = (activity.distance / 1000) / (activity.moving_time / 3600)
 
         data.append({
-            'date': a.start_date,
-            'type': a.type,
-            'distance_km': a.distance / 1000,
-            'elevation': a.total_elevation_gain,
-            'heart_rate': a.average_heartrate,
+            'date': activity.start_date,
+            'type': activity.type,
+            'distance_km': activity.distance / 1000,
+            'elevation': activity.total_elevation_gain,
+            'heart_rate': activity.average_heartrate,
             'speed_kmh': round(speed_kmh, 1)
         })
 
@@ -144,8 +146,8 @@ def sync_data():
         if not activities_json or isinstance(activities_json, dict):
             break
 
-        for act in activities_json:
-            existing = Activity.query.filter_by(strava_id=act['id']).first()
+        for activity_data in activities_json:
+            existing = Activity.query.filter_by(strava_id=activity_data['id']).first()
 
             if existing:
                 if not force_full:
@@ -156,15 +158,15 @@ def sync_data():
                     continue
 
             new_activity = Activity(
-                strava_id=act['id'],
-                name=act['name'],
-                type=act['type'],
-                distance=act['distance'],
-                moving_time=act['moving_time'],
-                total_elevation_gain=act.get('total_elevation_gain', 0),
-                start_date=datetime.strptime(act['start_date'], "%Y-%m-%dT%H:%M:%SZ"),
-                summary_polyline=act.get('map', {}).get('summary_polyline'),
-                average_heartrate=act.get('average_heartrate')
+                strava_id=activity_data['id'],
+                name=activity_data['name'],
+                type=activity_data['type'],
+                distance=activity_data['distance'],
+                moving_time=activity_data['moving_time'],
+                total_elevation_gain=activity_data.get('total_elevation_gain', 0),
+                start_date=datetime.strptime(activity_data['start_date'], "%Y-%m-%dT%H:%M:%SZ"),
+                summary_polyline=activity_data.get('map', {}).get('summary_polyline'),
+                average_heartrate=activity_data.get('average_heartrate')
             )
             db.session.add(new_activity)
             added_count += 1
@@ -206,13 +208,13 @@ def map_view():
 
     m = folium.Map(location=start_coords, zoom_start=13, tiles='CartoDB dark_matter')
 
-    for act in activities:
-        if act.summary_polyline:
+    for activity in activities:
+        if activity.summary_polyline:
             try:
-                coords = polyline.decode(act.summary_polyline)
-                color = '#ff4b4b' if act.type == 'Run' else '#0000ff'
+                coords = polyline.decode(activity.summary_polyline)
+                color = '#ff4b4b' if activity.type == 'Run' else '#0000ff'
                 folium.PolyLine(coords, color=color, weight=2.5, opacity=0.6,
-                                tooltip=f"{act.name}").add_to(m)
+                                tooltip=f"{activity.name}").add_to(m)
             except:
                 continue
 
