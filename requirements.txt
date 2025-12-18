@@ -6,3 +6,5 @@ python-dotenv
 pandas
 plotly
 pandas-stubs
+folium
+polyline
