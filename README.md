@@ -76,4 +76,3 @@ The application will be available at: **http://localhost:5000**
 *   **Infrastructure:** Docker Compose
 
 ---
-*Student Project - Python Programming Course*

@@ -10,8 +10,6 @@
 
 Strava Metrics Hub is a self-hosted analytics dashboard designed for endurance athletes. It solves the problem of ephemeral data access on cloud platforms by synchronizing Strava activity data into a local, persistent database. The application leverages Python’s data science stack to provide deep analytics, trend visualization, and statistics that go beyond the standard free tier of Strava.
 
-**Core Philosophy:** "Own your data, visualize your progress."
-
 The application is built as a containerized web service, making it portable and easy to deploy on any system with Docker.
 
 ---
@@ -57,7 +55,7 @@ The project uses a **Microservices-Lite** architecture orchestrated by Docker Co
 
 ## 3. Borrowed Code Statement
 
-This project was developed with the assistance of an AI coding companion for architectural structuring, debugging, and generating boilerplate code (e.g., HTML templates, Flask setup). The core logic, design decisions, and implementation of specific features (like the sync engine logic and data visualization choices) were verified and implemented by the student.
+This project was developed with the assistance of an AI coding companion for architectural structuring and debugging. The core logic, design decisions, and implementation of specific features (like the sync engine logic and data visualization choices) were implemented by the student.
 
 Standard documentation for Flask, Bootstrap 5, and Plotly was used as a reference. No complete applications or large logic blocks were copied from external repositories.
 
