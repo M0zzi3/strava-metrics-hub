@@ -20,12 +20,12 @@ The project uses a **Microservices-Lite** architecture orchestrated by Docker Co
 
 ### High-Level Components
 
-1.  **Web Container (The Brain):**
+1.  **Web Container(web):**
     *   **Technology:** Python 3.9, Flask.
     *   **Role:** Runs the application logic, serves the web interface, and communicates with the Strava API.
     *   **Key Libraries:** `Flask` (Web Framework), `SQLAlchemy` (ORM), `Pandas` (Data Processing), `Plotly` (Visualization).
 
-2.  **Database Container (The Memory):**
+2.  **Database Container(db):**
     *   **Technology:** PostgreSQL 15.
     *   **Role:** Persistently stores activity data.
     *   **Connection:** Accessed by the Web Container via a secure internal network.
@@ -47,8 +47,9 @@ The project uses a **Microservices-Lite** architecture orchestrated by Docker Co
 │   ├── strava_client.py # API Client: Handles OAuth2 and Strava API requests
 │   └── templates/       # Views: HTML/Jinja2 templates for the UI
 ├── docker-compose.yml   # Infrastructure: Defines the multi-container setup
-├── Dockerfile           # Build Instructions: Recipe for the Python environment
-└── run.py               # Entry Point: Script to launch the server
+├── Dockerfile           # Build Instructions: Setup for the Python environment
+├── run.py               # Entry Point: Script to launch the server
+└── .env                 # Environment Variables: For Database and Strava API
 ```
 
 ---
@@ -63,7 +64,7 @@ Standard documentation for Flask, Bootstrap 5, and Plotly was used as a referenc
 
 ## 4. Requirements
 
-The project dependencies are frozen in the `requirements.txt` file included in this archive.
+The project dependencies are frozen in the `requirements.txt`.
 
 **Key Libraries:**
 *   `Flask==3.1.2`: Web Framework
