@@ -60,6 +60,18 @@ def dashboard():
     fig_vol = px.bar(weekly_vol, x='date', y='distance_km',
                      title='Weekly Running Volume',
                      labels={'distance_km': 'Distance (km)', 'date': 'Week'})
+
+    fig_vol.update_traces(
+        hovertemplate='<b>Week of %{x|%d %b}</b><br>Distance: %{y:.1f} km<extra></extra>',
+        marker_color='#1f77b4'
+    )
+
+    fig_vol.update_xaxes(
+        dtick="M1",
+        tickformat="%b %Y",
+        ticklabelmode="period"
+    )
+
     fig_vol.update_layout(height=350)
     chart_html = pio.to_html(fig_vol, full_html=False)
 
@@ -71,21 +83,39 @@ def dashboard():
 
         # Speed Line
         fig_hr.add_trace(
-            go.Scatter(x=df_perf['date'], y=df_perf['speed_kmh'], name="Speed (km/h)",
-                       mode='lines+markers', line=dict(color='#1f77b4')),
+            go.Scatter(
+                x=df_perf['date'],
+                y=df_perf['speed_kmh'],
+                name="Speed",
+                mode='lines+markers',
+                line=dict(color='#1f77b4', width=2),
+                marker=dict(size=6),
+                hovertemplate='<b>Speed:</b> %{y:.1f} km/h<extra></extra>'
+            ),
             secondary_y=False,
         )
         # HR Line
         fig_hr.add_trace(
-            go.Scatter(x=df_perf['date'], y=df_perf['heart_rate'], name="Heart Rate (bpm)",
-                       mode='lines+markers', line=dict(color='#d62728')),
+            go.Scatter(
+                x=df_perf['date'],
+                y=df_perf['heart_rate'],
+                name="Heart Rate",
+                mode='lines+markers',
+                line=dict(color='#d62728', width=2),
+                marker=dict(size=6),
+                hovertemplate='<b>HR:</b> %{y:.0f} bpm<extra></extra>'
+            ),
             secondary_y=True,
         )
 
-        fig_hr.update_layout(title_text="Fitness Trend: Speed vs Heart Rate (Runs Only)", height=400,
-                             hovermode="x unified")
-        fig_hr.update_yaxes(title_text="Speed (km/h)", secondary_y=False)
-        fig_hr.update_yaxes(title_text="Heart Rate (bpm)", secondary_y=True)
+        fig_hr.update_layout(
+            title_text="Fitness Trend: Speed vs Heart Rate (Runs Only)",
+            height=400,
+            hovermode="x unified"
+        )
+
+        fig_hr.update_yaxes(title_text="Speed (km/h)", secondary_y=False, showgrid=True)
+        fig_hr.update_yaxes(title_text="Heart Rate (bpm)", secondary_y=True, showgrid=False)
 
         hr_chart_html = pio.to_html(fig_hr, full_html=False)
     else:
@@ -93,12 +123,23 @@ def dashboard():
 
     # Chart 3: Pie Chart
     fig_pie = px.pie(df, names='type', title='Activity Distribution', hole=0.4)
-    fig_pie.update_layout(height=350)
+    fig_pie.update_traces(hovertemplate='%{label}: %{value} activities (%{percent})<extra></extra>')
+    fig_pie.update_layout(
+        height=350,
+        legend=dict(itemclick=False, itemdoubleclick=False)
+    )
     pie_chart_html = pio.to_html(fig_pie, full_html=False)
 
     # Chart 4: Area Chart
+    df_sorted = df.sort_values('date')
     df_sorted['cum_elevation'] = df_sorted['elevation'].cumsum()
-    fig_elev = px.area(df_sorted, x='date', y='cum_elevation', title='Cumulative Elevation Gain (m)')
+    fig_elev = px.area(df_sorted, x='date', y='cum_elevation',
+                       title='Cumulative Elevation Gain (m)',
+                       labels={'cum_elevation': 'Total Climbed (m)'})
+    fig_elev.update_traces(
+        hovertemplate='<b>%{x|%d %b %Y}</b><br>Total Climbed: %{y} m<extra></extra>'
+    )
+
     fig_elev.update_layout(height=350)
     elev_chart_html = pio.to_html(fig_elev, full_html=False)
 
