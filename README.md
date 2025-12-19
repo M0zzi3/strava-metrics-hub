@@ -32,7 +32,7 @@ The project follows a microservices-lite architecture using Docker:
 ### 1. Configure Strava API
 
 1.  Go to your [Strava API Settings](https://www.strava.com/settings/api).
-2.  Create an application to get your `Client ID`, `Client Secret', and `Refresh Token`
+2.  Create an application to get your `Client ID`, `Client Secret`, and `Refresh Token`
 
 ### 2. Environment Setup
 
@@ -44,7 +44,7 @@ POSTGRES_USER=strava_user
 POSTGRES_PASSWORD=secure_password
 POSTGRES_DB=strava_db
 
-# Strava API Credentials
+# Strava API Credentials (You need to fill this section with your credentials)
 STRAVA_CLIENT_ID=12345
 STRAVA_CLIENT_SECRET=your_client_secret
 STRAVA_REFRESH_TOKEN=your_refresh_token
