@@ -1,8 +1,8 @@
 # SETUP INSTRUCTION
-> I have hardcoded valid API keys in the `env.example` file for demonstration purposes.
+> I have hardcoded valid API keys in the `.env.example` file for demonstration purposes.
 
 ## To run the project immediately for grading:
-1. Locate the file named `env.example` in the root folder of the submission.
+1. Locate the file named `.env.example` in the root folder of the submission.
 2. Rename this file to `.env`.
 3. Open a terminal in the project folder and run:
 ```bash
