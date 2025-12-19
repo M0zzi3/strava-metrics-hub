@@ -26,8 +26,8 @@ def dashboard():
 
     # AUTO-SYNC CHECK: If empty, trigger full sync
     if not activities:
-        print("Database empty. Triggering initial full sync...")
-        return redirect(url_for('main.sync_data', mode='full'))
+        print("Database empty. Triggering initial recent sync...")
+        return redirect(url_for('main.sync_data', mode='recent'))
 
     # Prepare Data
     data = []
@@ -170,11 +170,12 @@ def sync_data():
     mode = request.args.get('mode', 'recent')
     force_full = (mode == 'full')
 
+    max_pages = 50 if force_full else 2
     page = 1
     added_count = 0
     keep_fetching = True
 
-    print(f"--- Starting Sync (Mode: {mode}) ---")
+    print(f"--- Starting Sync (Mode: {mode}, Max Pages: {max_pages}) ---")
 
     while keep_fetching:
         print(f"Fetching page {page}...")
@@ -214,7 +215,8 @@ def sync_data():
 
         db.session.commit()
 
-        if page > 20:
+        if page >= max_pages:
+            print(f"Reached page limit ({max_pages}) for mode '{mode}'. Stopping.")
             break
         page += 1
 
