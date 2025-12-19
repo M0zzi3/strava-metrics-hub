@@ -26,8 +26,8 @@ def dashboard():
 
     # AUTO-SYNC CHECK: If empty, trigger full sync
     if not activities:
-        print("Database empty. Triggering initial full sync...")
-        return redirect(url_for('main.sync_data', mode='full'))
+        print("Database empty. Triggering initial recent sync...")
+        return redirect(url_for('main.sync_data', mode='recent'))
 
     # Prepare Data
     data = []
@@ -60,6 +60,18 @@ def dashboard():
     fig_vol = px.bar(weekly_vol, x='date', y='distance_km',
                      title='Weekly Running Volume',
                      labels={'distance_km': 'Distance (km)', 'date': 'Week'})
+
+    fig_vol.update_traces(
+        hovertemplate='<b>Week of %{x|%d %b}</b><br>Distance: %{y:.1f} km<extra></extra>',
+        marker_color='#1f77b4'
+    )
+
+    fig_vol.update_xaxes(
+        dtick="M1",
+        tickformat="%b %Y",
+        ticklabelmode="period"
+    )
+
     fig_vol.update_layout(height=350)
     chart_html = pio.to_html(fig_vol, full_html=False)
 
@@ -71,21 +83,39 @@ def dashboard():
 
         # Speed Line
         fig_hr.add_trace(
-            go.Scatter(x=df_perf['date'], y=df_perf['speed_kmh'], name="Speed (km/h)",
-                       mode='lines+markers', line=dict(color='#1f77b4')),
+            go.Scatter(
+                x=df_perf['date'],
+                y=df_perf['speed_kmh'],
+                name="Speed",
+                mode='lines+markers',
+                line=dict(color='#1f77b4', width=2),
+                marker=dict(size=6),
+                hovertemplate='<b>Speed:</b> %{y:.1f} km/h<extra></extra>'
+            ),
             secondary_y=False,
         )
         # HR Line
         fig_hr.add_trace(
-            go.Scatter(x=df_perf['date'], y=df_perf['heart_rate'], name="Heart Rate (bpm)",
-                       mode='lines+markers', line=dict(color='#d62728')),
+            go.Scatter(
+                x=df_perf['date'],
+                y=df_perf['heart_rate'],
+                name="Heart Rate",
+                mode='lines+markers',
+                line=dict(color='#d62728', width=2),
+                marker=dict(size=6),
+                hovertemplate='<b>HR:</b> %{y:.0f} bpm<extra></extra>'
+            ),
             secondary_y=True,
         )
 
-        fig_hr.update_layout(title_text="Fitness Trend: Speed vs Heart Rate (Runs Only)", height=400,
-                             hovermode="x unified")
-        fig_hr.update_yaxes(title_text="Speed (km/h)", secondary_y=False)
-        fig_hr.update_yaxes(title_text="Heart Rate (bpm)", secondary_y=True)
+        fig_hr.update_layout(
+            title_text="Fitness Trend: Speed vs Heart Rate (Runs Only)",
+            height=400,
+            hovermode="x unified"
+        )
+
+        fig_hr.update_yaxes(title_text="Speed (km/h)", secondary_y=False, showgrid=True)
+        fig_hr.update_yaxes(title_text="Heart Rate (bpm)", secondary_y=True, showgrid=False)
 
         hr_chart_html = pio.to_html(fig_hr, full_html=False)
     else:
@@ -93,12 +123,23 @@ def dashboard():
 
     # Chart 3: Pie Chart
     fig_pie = px.pie(df, names='type', title='Activity Distribution', hole=0.4)
-    fig_pie.update_layout(height=350)
+    fig_pie.update_traces(hovertemplate='%{label}: %{value} activities (%{percent})<extra></extra>')
+    fig_pie.update_layout(
+        height=350,
+        legend=dict(itemclick=False, itemdoubleclick=False)
+    )
     pie_chart_html = pio.to_html(fig_pie, full_html=False)
 
     # Chart 4: Area Chart
+    df_sorted = df.sort_values('date')
     df_sorted['cum_elevation'] = df_sorted['elevation'].cumsum()
-    fig_elev = px.area(df_sorted, x='date', y='cum_elevation', title='Cumulative Elevation Gain (m)')
+    fig_elev = px.area(df_sorted, x='date', y='cum_elevation',
+                       title='Cumulative Elevation Gain (m)',
+                       labels={'cum_elevation': 'Total Climbed (m)'})
+    fig_elev.update_traces(
+        hovertemplate='<b>%{x|%d %b %Y}</b><br>Total Climbed: %{y} m<extra></extra>'
+    )
+
     fig_elev.update_layout(height=350)
     elev_chart_html = pio.to_html(fig_elev, full_html=False)
 
@@ -129,11 +170,12 @@ def sync_data():
     mode = request.args.get('mode', 'recent')
     force_full = (mode == 'full')
 
+    max_pages = 50 if force_full else 2
     page = 1
     added_count = 0
     keep_fetching = True
 
-    print(f"--- Starting Sync (Mode: {mode}) ---")
+    print(f"--- Starting Sync (Mode: {mode}, Max Pages: {max_pages}) ---")
 
     while keep_fetching:
         print(f"Fetching page {page}...")
@@ -173,7 +215,8 @@ def sync_data():
 
         db.session.commit()
 
-        if page > 20:
+        if page >= max_pages:
+            print(f"Reached page limit ({max_pages}) for mode '{mode}'. Stopping.")
             break
         page += 1
 
@@ -194,17 +237,18 @@ def activity_list():
 def map_view():
     """
     Render the heatmap of all activities.
+    Centered on the most recent activity.
     """
-    activities = Activity.query.filter(Activity.summary_polyline != None).all()
+    activities = Activity.query.filter(Activity.summary_polyline != None).order_by(Activity.start_date.desc()).all()
     start_coords = [51.2194, 4.4025]
 
     if activities:
         try:
-            first_poly = polyline.decode(activities[0].summary_polyline)
-            if first_poly:
-                start_coords = first_poly[0]
-        except:
-            pass
+            recent_poly = polyline.decode(activities[0].summary_polyline)
+            if recent_poly:
+                start_coords = recent_poly[0]
+        except Exception as e:
+            print(f"Error finding start coords: {e}")
 
     m = folium.Map(location=start_coords, zoom_start=13, tiles='CartoDB dark_matter')
 
@@ -213,8 +257,13 @@ def map_view():
             try:
                 coords = polyline.decode(activity.summary_polyline)
                 color = '#ff4b4b' if activity.type == 'Run' else '#0000ff'
-                folium.PolyLine(coords, color=color, weight=2.5, opacity=0.6,
-                                tooltip=f"{activity.name}").add_to(m)
+                folium.PolyLine(
+                    coords,
+                    color=color,
+                    weight=2.5,
+                    opacity=0.6,
+                    tooltip=f"{activity.name} ({activity.start_date.strftime('%Y-%m-%d')})"
+                ).add_to(m)
             except:
                 continue
 

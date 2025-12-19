@@ -39,7 +39,7 @@ The project follows a microservices-lite architecture using Docker:
 ### 1. Configure Strava API
 
 1.  Go to your [Strava API Settings](https://www.strava.com/settings/api).
-2.  Create an application to get your `Client ID`, `Client Secret` and `Refresh Token`.
+2.  Create an application to get your `Client ID`, `Client Secret`, and `Refresh Token`
 
 ### 2. Environment Setup
 
@@ -82,3 +82,4 @@ The application will be available at: **http://localhost:5000**
 *   **Infrastructure:** Docker Compose
 
 ---
+*Student Project - Python Programming Course*
