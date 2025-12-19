@@ -237,17 +237,18 @@ def activity_list():
 def map_view():
     """
     Render the heatmap of all activities.
+    Centered on the most recent activity.
     """
-    activities = Activity.query.filter(Activity.summary_polyline != None).all()
+    activities = Activity.query.filter(Activity.summary_polyline != None).order_by(Activity.start_date.desc()).all()
     start_coords = [51.2194, 4.4025]
 
     if activities:
         try:
-            first_poly = polyline.decode(activities[0].summary_polyline)
-            if first_poly:
-                start_coords = first_poly[0]
-        except:
-            pass
+            recent_poly = polyline.decode(activities[0].summary_polyline)
+            if recent_poly:
+                start_coords = recent_poly[0]
+        except Exception as e:
+            print(f"Error finding start coords: {e}")
 
     m = folium.Map(location=start_coords, zoom_start=13, tiles='CartoDB dark_matter')
 
@@ -256,8 +257,13 @@ def map_view():
             try:
                 coords = polyline.decode(activity.summary_polyline)
                 color = '#ff4b4b' if activity.type == 'Run' else '#0000ff'
-                folium.PolyLine(coords, color=color, weight=2.5, opacity=0.6,
-                                tooltip=f"{activity.name}").add_to(m)
+                folium.PolyLine(
+                    coords,
+                    color=color,
+                    weight=2.5,
+                    opacity=0.6,
+                    tooltip=f"{activity.name} ({activity.start_date.strftime('%Y-%m-%d')})"
+                ).add_to(m)
             except:
                 continue
 
