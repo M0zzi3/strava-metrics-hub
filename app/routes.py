@@ -24,7 +24,7 @@ def dashboard():
     """
     activities = Activity.query.order_by(Activity.start_date.desc()).all()
 
-    # AUTO-SYNC CHECK: If empty, trigger full sync
+    # Auto-Sync
     if not activities:
         print("Database empty. Triggering initial recent sync...")
         return redirect(url_for('main.sync_data', mode='recent'))
@@ -52,7 +52,7 @@ def dashboard():
     total_elevation = int(df['elevation'].sum())
     activity_count = len(df)
 
-    # Chart 1: Weekly Volume (Bar Chart)
+    # Chart 1: Bar Chart
     df_sorted = df.sort_values('date')
     df_run = df_sorted[df_sorted['type'] == 'Run']
     weekly_vol = df_run.resample('W', on='date')['distance_km'].sum().reset_index()
@@ -75,7 +75,7 @@ def dashboard():
     fig_vol.update_layout(height=350)
     chart_html = pio.to_html(fig_vol, full_html=False)
 
-    # Chart 2: Speed vs Heart Rate Over Time (Dual Axis)
+    # Chart 2: Line Chart
     df_perf = df_run.dropna(subset=['heart_rate'])
 
     if not df_perf.empty:
